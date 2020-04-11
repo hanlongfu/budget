@@ -1,5 +1,5 @@
 // budget Controller module
-const budgetController = (function () {
+const budgetController = (() => {
   //Expense constructor
   const Expense = function (id, description, value) {
     this.id = id;
@@ -13,7 +13,7 @@ const budgetController = (function () {
     this.value = value;
   };
 
-  //create an empty object to store input and tally data
+  //create an empty object to store input data
   const data = {
     allItems: {
       exp: [],
@@ -27,7 +27,7 @@ const budgetController = (function () {
 
   // all public methods
   return {
-    addInputToData: function (type, desc, val) {
+    addInputToData: (type, desc, val) => {
       //initialize ID
       let ID = null;
       let newItem = null;
@@ -50,7 +50,7 @@ const budgetController = (function () {
         newItem = new Expense(ID, desc, val);
       } else if (type === 'inc') {
         // instance of income constructor function
-        newItem = new Income(ID, desc, val)
+        newItem = new Income(ID, desc, val);
       }
 
       //push it into our data structure
@@ -61,7 +61,7 @@ const budgetController = (function () {
     },
 
     //testing code
-    testing: function () {
+    testing: () => {
       console.log(data);
     }
   };
@@ -69,7 +69,7 @@ const budgetController = (function () {
 
 
 // UI Controller module
-const UIController = (function () {
+const UIController = (() => {
   //
   const DOMstrings = {
     inputType: '.add__type',
@@ -80,7 +80,7 @@ const UIController = (function () {
     expensesContainer: '.expenses__list'
   };
   return {
-    getInput: function () {
+    getInput: () => {
       return {
         // either inc - income; exp - expenses
         type: document.querySelector(DOMstrings.inputType).value,
@@ -90,7 +90,7 @@ const UIController = (function () {
     },
 
     //display data on the webpage
-    displayInputList: function (obj, type) {
+    displayInputList: (obj, type) => {
       const element = (type === 'inc') ? DOMstrings.incomeContainer : DOMstrings.expensesContainer;
 
       const html = (type === 'inc') ? '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>' : '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
@@ -113,25 +113,25 @@ const UIController = (function () {
 
 // Global App Controller
 // this tells other modules what to do
-const controller = (function (budgetCtrl, UICtrl) {
-  const setupEventListners = function () {
+const appController = ((budgetCtrl, UICtrl) => {
+  const setupEventListeners = () => {
     const DOM = UICtrl.getDOMstrings();
 
-    // bind eventlistener to click event
+    // bind event listener to click event
     document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
 
     // do the same thing with keypress event
-    document.addEventListener('keypress', function (e) {
+    document.addEventListener('keypress', (e) => {
       if (e.keyCode === 13 || event.which === 13) {
         ctrlAddItem();
       }
     });
   };
 
-  // add item
-  const ctrlAddItem = function () {
+  // add Item when button is clicked
+  const ctrlAddItem = () => {
     // 1. Get the field input data
-    const input = UIController.getInput();
+    const input = UICtrl.getInput();
     // 2. Add the item to the budget controller
     const newItem = budgetCtrl.addInputToData(input.type, input.description, input.value);
     // 3. Add the item to the UI
@@ -141,11 +141,10 @@ const controller = (function (budgetCtrl, UICtrl) {
   };
 
   return {
-    init: function () {
-      setupEventListners();
+    init: () => {
+      setupEventListeners();
     }
   };
 
-
 })(budgetController, UIController); //pass the other two modules
-controller.init();
+appController.init();
