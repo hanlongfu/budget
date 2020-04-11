@@ -104,7 +104,22 @@ const UIController = (() => {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
-    getDOMstrings: function () {
+    clearFields: () => {
+      // select the fields to be cleared
+      const fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+
+      // a trick to convert a NodeList to an array
+      // const fieldsArr = Array.prototype.slice.call(fields);
+
+      // another way to convert a nodeList to an Array
+      const fieldsArr2 = Array.from(fields);
+
+      //clear input fields
+      fieldsArr2.forEach((element) => element.value = "");
+
+    },
+
+    getDOMstrings: () => {
       return DOMstrings;
     }
   };
@@ -132,10 +147,16 @@ const appController = ((budgetCtrl, UICtrl) => {
   const ctrlAddItem = () => {
     // 1. Get the field input data
     const input = UICtrl.getInput();
+
     // 2. Add the item to the budget controller
     const newItem = budgetCtrl.addInputToData(input.type, input.description, input.value);
+
     // 3. Add the item to the UI
     UICtrl.displayInputList(newItem, input.type);
+
+    //4. Clear the input fields
+    UICtrl.clearFields();
+
     // 4. Calculate the budget
     // 5. Display the budget
   };
