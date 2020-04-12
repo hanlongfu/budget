@@ -22,7 +22,19 @@ const budgetController = (() => {
     totals: {
       exp: 0,
       inc: 0
-    }
+    },
+    budget: 0,
+    percentage: -1
+  };
+
+  //calculate total income and expense
+  const calculateTotal = (type) => {
+    //calculate totals
+    const sum = data.allItems[type].reduce((acc, curr) => acc + curr);
+
+    //pass sum to existing data object
+    data.totals[type] = sum;
+
   };
 
   // all public methods
@@ -60,6 +72,18 @@ const budgetController = (() => {
       return newItem;
     },
 
+    calculateBudget: () => {
+      //calculate total income and expenses
+      calculateTotal('exp');
+      calculateTotal('inc');
+
+      //calculate the budget: income - expenses
+      data.budget = data.totals.inc = data.totals.exp;
+
+      //calculate the percentage of income that we spent
+      data.percentage = data.totals.exp / data.totals.inc;
+
+    },
     //testing code
     testing: () => {
       console.log(data);
@@ -83,9 +107,10 @@ const UIController = (() => {
     getInput: () => {
       return {
         // either inc - income; exp - expenses
+        // .value returns a string not a number
         type: document.querySelector(DOMstrings.inputType).value,
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
     },
 
@@ -112,10 +137,13 @@ const UIController = (() => {
       // const fieldsArr = Array.prototype.slice.call(fields);
 
       // another way to convert a nodeList to an Array
-      const fieldsArr2 = Array.from(fields);
+      const fieldsArr = Array.from(fields);
 
       //clear input fields
-      fieldsArr2.forEach((element) => element.value = "");
+      fieldsArr.forEach((element) => element.value = "");
+
+      // set the focus back to the first field
+      fieldsArr[0].focus();
 
     },
 
@@ -124,7 +152,6 @@ const UIController = (() => {
     }
   };
 })();
-
 
 // Global App Controller
 // this tells other modules what to do
@@ -143,22 +170,35 @@ const appController = ((budgetCtrl, UICtrl) => {
     });
   };
 
+  const updateBudget = () => {
+    // 1. Calculate the budget
+
+    // 2. Return the budget
+
+    // 3. Display the budget on the UI
+
+  };
+
   // add Item when button is clicked
   const ctrlAddItem = () => {
     // 1. Get the field input data
     const input = UICtrl.getInput();
 
-    // 2. Add the item to the budget controller
-    const newItem = budgetCtrl.addInputToData(input.type, input.description, input.value);
+    // check the input fieldd - no empty fields and value field must be numeric
+    if (input.description !== '' && !isNaN(input.value) && input.value > 0) {
 
-    // 3. Add the item to the UI
-    UICtrl.displayInputList(newItem, input.type);
+      // 2. Add the item to the budget controller
+      const newItem = budgetCtrl.addInputToData(input.type, input.description, input.value);
 
-    //4. Clear the input fields
-    UICtrl.clearFields();
+      // 3. Add the item to the UI
+      UICtrl.displayInputList(newItem, input.type);
 
-    // 4. Calculate the budget
-    // 5. Display the budget
+      //4. Clear the input fields
+      UICtrl.clearFields();
+
+      //5. Calculate and update budget
+      updateBudget();
+    }
   };
 
   return {
