@@ -169,6 +169,12 @@ const UIController = (() => {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
+    // delete income or expense items from DOM UI
+    deleteInputList: (selectorId) => {
+      const el = document.getElementById(selectorId);
+      el.parentNode.removeChild(el);
+    },
+
     clearFields: () => {
       // select the fields to be cleared
       const fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
@@ -275,9 +281,10 @@ const appController = ((budgetCtrl, UICtrl) => {
       budgetCtrl.deleteItem(type, Id);
 
       //2. delte the item from the UI
+      UICtrl.deleteInputList(itemId);
 
       //3. update and show the new budget
-
+      updateBudget();
 
     }
 
