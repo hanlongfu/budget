@@ -99,6 +99,17 @@ const budgetController = (() => {
       }
     },
 
+    //deleting items need type - inc/exp and unique id
+    deleteItem: (type, id) => {
+      const ids = data.allItems[type].map((curr) => curr.id);
+      const index = ids.indexOf(id);
+
+      //if index does not exist
+      if (index !== -1) {
+        data.allItems[type].splice(index, 1);
+      }
+
+    },
     //testing code
     testing: () => {
       console.log(data);
@@ -120,7 +131,8 @@ const UIController = (() => {
     budgetLabel: '.budget__value',
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
-    percentageLabel: '.budget__expenses--percentage'
+    percentageLabel: '.budget__expenses--percentage',
+    container: '.container'
   };
 
   //obtain budget-related DOM elements
@@ -146,7 +158,7 @@ const UIController = (() => {
     displayInputList: (obj, type) => {
       const element = (type === 'inc') ? DOMstrings.incomeContainer : DOMstrings.expensesContainer;
 
-      const html = (type === 'inc') ? '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>' : '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+      const html = (type === 'inc') ? '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>' : '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
 
       //replace the placeholder text with actual data
       let newHtml = html.replace('%id%', obj.id);
@@ -182,9 +194,6 @@ const UIController = (() => {
       budgetDOM.currExpense.innerText = `- ${obj.totalExp}`;
       budgetDOM.currPercent.innerText = `${obj.percentage}%`;
 
-      if (obj.percentage > 0) {
-
-      }
     },
 
     getDOMstrings: () => {
@@ -196,6 +205,8 @@ const UIController = (() => {
 // Global App Controller
 // this tells other modules what to do
 const appController = ((budgetCtrl, UICtrl) => {
+
+  // grouping all the event listeners
   const setupEventListeners = () => {
     const DOM = UICtrl.getDOMstrings();
 
@@ -208,6 +219,11 @@ const appController = ((budgetCtrl, UICtrl) => {
         ctrlAddItem();
       }
     });
+
+    // we bind a delete function to the parent event of all income and 
+    // expense items using event delegation
+    document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
   };
 
   //update the budget
@@ -242,6 +258,29 @@ const appController = ((budgetCtrl, UICtrl) => {
       //5. Calculate and update budget
       updateBudget();
     }
+  };
+
+  // delete item when button is clicked
+  const ctrlDeleteItem = (e) => {
+
+    let itemId = e.target.parentNode.parentNode.parentNode.parentNode.id;
+
+    if (itemId) {
+      // inc-1 splitted into ["inc", "-"]
+      const splitId = itemId.split('-');
+      const type = splitId[0];
+      const Id = parseInt(splitId[1]);
+
+      //1. delete the item from the data structure
+      budgetCtrl.deleteItem(type, Id);
+
+      //2. delte the item from the UI
+
+      //3. update and show the new budget
+
+
+    }
+
   };
 
   return {
