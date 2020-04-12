@@ -13,6 +13,18 @@ const budgetController = (() => {
     this.value = value;
   };
 
+  //calculate total income and expense
+  const calculateTotal = (type) => {
+    //calculate totals
+    let sum = 0;
+
+    data.allItems[type].forEach((el) => sum += el.value);
+
+    //pass sum to existing data object
+    data.totals[type] = sum;
+
+  };
+
   //create an empty object to store input data
   const data = {
     allItems: {
@@ -25,16 +37,6 @@ const budgetController = (() => {
     },
     budget: 0,
     percentage: -1
-  };
-
-  //calculate total income and expense
-  const calculateTotal = (type) => {
-    //calculate totals
-    const sum = data.allItems[type].reduce((acc, curr) => acc + curr);
-
-    //pass sum to existing data object
-    data.totals[type] = sum;
-
   };
 
   // all public methods
@@ -78,12 +80,25 @@ const budgetController = (() => {
       calculateTotal('inc');
 
       //calculate the budget: income - expenses
-      data.budget = data.totals.inc = data.totals.exp;
+      data.budget = data.totals.inc - data.totals.exp;
 
-      //calculate the percentage of income that we spent
-      data.percentage = data.totals.exp / data.totals.inc;
-
+      if (data.totals.inc > 0) {
+        //calculate the percentage of income that we spent
+        data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+      } else {
+        data.percentage = -1;
+      }
     },
+
+    getBudget: () => {
+      return {
+        budget: data.budget,
+        totalInc: data.totals.inc,
+        totalExp: data.totals.exp,
+        percentage: data.percentage
+      }
+    },
+
     //testing code
     testing: () => {
       console.log(data);
@@ -101,8 +116,21 @@ const UIController = (() => {
     inputValue: '.add__value',
     inputBtn: '.add__btn',
     incomeContainer: '.income__list',
-    expensesContainer: '.expenses__list'
+    expensesContainer: '.expenses__list',
+    budgetLabel: '.budget__value',
+    incomeLabel: '.budget__income--value',
+    expensesLabel: '.budget__expenses--value',
+    percentageLabel: '.budget__expenses--percentage'
   };
+
+  //obtain budget-related DOM elements
+  const budgetDOM = {
+    currBudget: document.querySelector(DOMstrings.budgetLabel),
+    currIncome: document.querySelector(DOMstrings.incomeLabel),
+    currExpense: document.querySelector(DOMstrings.expensesLabel),
+    currPercent: document.querySelector(DOMstrings.percentageLabel),
+  };
+
   return {
     getInput: () => {
       return {
@@ -147,6 +175,18 @@ const UIController = (() => {
 
     },
 
+    //display budget on UI
+    displayBudget: (obj) => {
+      budgetDOM.currBudget.innerText = `+ ${obj.budget}`;
+      budgetDOM.currIncome.innerText = `+ ${obj.totalInc}`;
+      budgetDOM.currExpense.innerText = `- ${obj.totalExp}`;
+      budgetDOM.currPercent.innerText = `${obj.percentage}%`;
+
+      if (obj.percentage > 0) {
+
+      }
+    },
+
     getDOMstrings: () => {
       return DOMstrings;
     }
@@ -170,13 +210,16 @@ const appController = ((budgetCtrl, UICtrl) => {
     });
   };
 
+  //update the budget
   const updateBudget = () => {
     // 1. Calculate the budget
+    budgetCtrl.calculateBudget();
 
     // 2. Return the budget
+    const budget = budgetCtrl.getBudget();
 
     // 3. Display the budget on the UI
-
+    UICtrl.displayBudget(budget);
   };
 
   // add Item when button is clicked
@@ -203,6 +246,15 @@ const appController = ((budgetCtrl, UICtrl) => {
 
   return {
     init: () => {
+      console.log('Application has started');
+
+      //initialize to zero
+      UICtrl.displayBudget({
+        budget: 0,
+        totalInc: 0,
+        totalExp: 0,
+        percentage: 0
+      });
       setupEventListeners();
     }
   };
