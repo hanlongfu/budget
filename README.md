@@ -1,3 +1,3 @@
 # budget
-This is my optimized version of the budget app from the udemy course - The Complete Javascript Course 2020.  
+This is my optimized version of a simple budget app from a javascript tutorial.  
 
