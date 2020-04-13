@@ -13,7 +13,7 @@ const budgetController = (() => {
 	//DO NOT Use Arrow Functions
 	Expense.prototype.calcPercentage = function (totalIncome) {
 		if (totalIncome > 0) {
-			this.percentage = Math.round((this.value / totalIncome) * 100);
+			this.percentage = +((this.value / totalIncome) * 100).toFixed(2);
 		} else {
 			this.percentage = -1;
 		}
@@ -96,11 +96,13 @@ const budgetController = (() => {
 			calculateTotal("inc");
 
 			//calculate the budget: income - expenses
-			data.budget = data.totals.inc - data.totals.exp;
+			data.budget = (data.totals.inc - data.totals.exp).toFixed(2);
 
 			if (data.totals.inc > 0) {
 				//calculate the percentage of income that we spent
-				data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+				data.percentage = +((data.totals.exp / data.totals.inc) * 100).toFixed(
+					2
+				);
 			} else {
 				data.percentage = -1;
 			}
@@ -163,6 +165,7 @@ const UIController = (() => {
 		percentageLabel: ".budget__expenses--percentage",
 		container: ".container",
 		expensesPerLabel: ".item__percentage",
+		dateLabel: ".budget__title--month",
 	};
 
 	//obtain budget-related DOM elements
@@ -277,7 +280,6 @@ const UIController = (() => {
 					callback(list[i], i);
 				}
 			};
-
 			//we pass a callback function into nodeListforEach
 			nodeListForEach(percentageFields, (el, idx) => {
 				if (percentages[idx] > 0) {
@@ -286,6 +288,29 @@ const UIController = (() => {
 					el.textContent = `---`;
 				}
 			});
+		},
+
+		displayMonth: () => {
+			let now = new Date();
+			let year = now.getFullYear();
+			let monthArr = [
+				"January",
+				"February",
+				"March",
+				"April",
+				"May",
+				"June",
+				"July",
+				"August",
+				"September",
+				"October",
+				"November",
+				"December",
+			];
+			let month = now.getMonth();
+			document.querySelector(
+				DOMstrings.dateLabel
+			).textContent = `${monthArr[month]} ${year}`;
 		},
 
 		getDOMstrings: () => {
@@ -399,6 +424,7 @@ const appController = ((budgetCtrl, UICtrl) => {
 		init: () => {
 			console.log("Application has started");
 
+			UICtrl.displayMonth();
 			//initialize to zero
 			UICtrl.displayBudget({
 				budget: 0,
