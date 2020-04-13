@@ -202,6 +202,13 @@ const UIController = (() => {
 		}
 	};
 
+	//a custom forEach function for nodeList (by default nodeList doesn't have forEach)
+	const nodeListForEach = (list, callback) => {
+		for (let i = 0; i < list.length; i++) {
+			callback(list[i], i);
+		}
+	};
+
 	return {
 		getInput: () => {
 			return {
@@ -274,12 +281,6 @@ const UIController = (() => {
 				DOMstrings.expensesPerLabel
 			);
 
-			//a custom forEach function for nodeList (by default nodeList doesn't have forEach)
-			const nodeListForEach = (list, callback) => {
-				for (let i = 0; i < list.length; i++) {
-					callback(list[i], i);
-				}
-			};
 			//we pass a callback function into nodeListforEach
 			nodeListForEach(percentageFields, (el, idx) => {
 				if (percentages[idx] > 0) {
@@ -313,6 +314,21 @@ const UIController = (() => {
 			).textContent = `${monthArr[month]} ${year}`;
 		},
 
+		changedType: () => {
+			let fields = document.querySelectorAll(
+				DOMstrings.inputType +
+					"," +
+					DOMstrings.inputDescription +
+					"," +
+					DOMstrings.inputValue
+			);
+
+			//toggle(add/remove) red-focus class to the three elements
+			nodeListForEach(fields, (el) => el.classList.toggle("red-focus"));
+
+			document.querySelector(DOMstrings.inputBtn).classList.toggle("red");
+		},
+
 		getDOMstrings: () => {
 			return DOMstrings;
 		},
@@ -342,6 +358,10 @@ const appController = ((budgetCtrl, UICtrl) => {
 		document
 			.querySelector(DOM.container)
 			.addEventListener("click", ctrlDeleteItem);
+
+		document
+			.querySelector(DOM.inputType)
+			.addEventListener("change", UICtrl.changedType);
 	};
 
 	//update the budget
